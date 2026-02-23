@@ -54,7 +54,7 @@ export default async function OrdersPage() {
           </Link>
         </Button>
         <div>
-          <h2 className="text-3xl font-heading font-bold tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight">
             Orders
           </h2>
           <p className="text-muted-foreground">
@@ -63,8 +63,8 @@ export default async function OrdersPage() {
         </div>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border overflow-x-auto">
+        <Table className="min-w-[800px]">
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>

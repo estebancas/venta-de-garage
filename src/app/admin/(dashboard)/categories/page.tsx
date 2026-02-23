@@ -29,16 +29,16 @@ export default async function CategoriesPage() {
             Back to Dashboard
           </Link>
         </Button>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-3xl font-heading font-bold tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight">
               Categories
             </h2>
             <p className="text-muted-foreground">
               Manage product categories
             </p>
           </div>
-          <Button asChild>
+          <Button asChild className="w-full sm:w-auto">
             <Link href="/admin/categories/new">
               <Plus className="h-4 w-4 mr-2" />
               Add Category
@@ -48,8 +48,8 @@ export default async function CategoriesPage() {
       </div>
 
       {categories && categories.length > 0 ? (
-        <div className="rounded-md border">
-          <Table>
+        <div className="rounded-md border overflow-x-auto">
+          <Table className="min-w-[500px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>

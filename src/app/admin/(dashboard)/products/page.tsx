@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { ProductStatusSelect } from "@/components/admin/product-status-select";
 import { Plus, ArrowLeft } from "lucide-react";
 
 export default async function ProductsPage() {
@@ -20,19 +20,6 @@ export default async function ProductsPage() {
     .select("*, categories(name)")
     .order("created_at", { ascending: false });
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "outline"> = {
-      active: "default",
-      sold: "secondary",
-      reserved: "outline",
-    };
-
-    return (
-      <Badge variant={variants[status] || "default"}>
-        {status}
-      </Badge>
-    );
-  };
 
   return (
     <div className="space-y-6">
@@ -43,16 +30,16 @@ export default async function ProductsPage() {
             Back to Dashboard
           </Link>
         </Button>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-3xl font-heading font-bold tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight">
               Products
             </h2>
             <p className="text-muted-foreground">
               Manage your garage sale inventory
             </p>
           </div>
-          <Button asChild>
+          <Button asChild className="w-full sm:w-auto">
             <Link href="/admin/products/new">
               <Plus className="h-4 w-4 mr-2" />
               Add Product
@@ -62,8 +49,8 @@ export default async function ProductsPage() {
       </div>
 
       {products && products.length > 0 ? (
-        <div className="rounded-md border">
-          <Table>
+        <div className="rounded-md border overflow-x-auto">
+          <Table className="min-w-[600px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
@@ -81,7 +68,12 @@ export default async function ProductsPage() {
                     {product.categories?.name || "Uncategorized"}
                   </TableCell>
                   <TableCell>₡{product.price.toLocaleString()}</TableCell>
-                  <TableCell>{getStatusBadge(product.status)}</TableCell>
+                  <TableCell>
+                    <ProductStatusSelect
+                      productId={product.id}
+                      currentStatus={product.status}
+                    />
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/admin/products/${product.id}`}>

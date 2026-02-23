@@ -32,7 +32,7 @@ export function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center space-x-4 lg:space-x-6">
+    <nav className="flex items-center gap-2 sm:gap-4 lg:gap-6 w-full sm:w-auto justify-center sm:justify-start">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -48,8 +48,8 @@ export function AdminNav() {
                 : "text-muted-foreground"
             )}
           >
-            <Icon className="h-4 w-4 mr-2" />
-            {item.title}
+            <Icon className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{item.title}</span>
           </Link>
         );
       })}
