@@ -13,14 +13,15 @@ export function ProductGallery({ images }: ProductGalleryProps) {
   const displayImages = images.length > 0 ? images : ["/placeholder-product.png"];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 sticky top-24">
       {/* Main Image */}
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+      <div className="relative aspect-square overflow-hidden rounded-3xl bg-muted/30 shadow-2xl">
         <Image
+          key={selectedImage}
           src={displayImages[selectedImage]}
           alt="Product image"
           fill
-          className="object-cover"
+          className="object-cover transition-opacity duration-500 ease-out"
           sizes="(max-width: 768px) 100vw, 50vw"
           priority
         />
@@ -28,16 +29,16 @@ export function ProductGallery({ images }: ProductGalleryProps) {
 
       {/* Thumbnail Grid */}
       {displayImages.length > 1 && (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-3">
           {displayImages.map((image, index) => (
             <button
               key={index}
               onClick={() => setSelectedImage(index)}
               className={cn(
-                "relative aspect-square overflow-hidden rounded-md border-2 transition-all",
+                "relative aspect-square overflow-hidden rounded-2xl transition-all duration-300 ease-out",
                 selectedImage === index
-                  ? "border-primary ring-2 ring-primary ring-offset-2"
-                  : "border-transparent hover:border-muted-foreground/50"
+                  ? "ring-2 ring-foreground ring-offset-4 ring-offset-background scale-105 shadow-lg"
+                  : "opacity-60 hover:opacity-100 hover:scale-105 shadow-md"
               )}
             >
               <Image
@@ -45,7 +46,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
                 alt={`Product thumbnail ${index + 1}`}
                 fill
                 className="object-cover"
-                sizes="100px"
+                sizes="120px"
               />
             </button>
           ))}

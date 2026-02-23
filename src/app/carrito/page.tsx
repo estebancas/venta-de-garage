@@ -136,16 +136,18 @@ export default function CartPage() {
       <>
         <StorefrontHeader />
         <main className="min-h-screen">
-          <div className="container py-8">
-            <div className="max-w-md mx-auto flex flex-col items-center justify-center py-16 text-center">
-              <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
-              <h2 className="text-3xl font-heading font-bold mb-2">
+          <div className="container py-16">
+            <div className="max-w-md mx-auto flex flex-col items-center justify-center py-24 text-center opacity-0 animate-fade-in-scale">
+              <div className="mb-8 p-6 rounded-full bg-green-50">
+                <CheckCircle2 className="h-20 w-20 text-green-500" />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4 tracking-tight">
                 ¡Orden recibida!
               </h2>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-lg text-muted-foreground mb-3 leading-relaxed">
                 Verificaremos tu pago y te contactaremos pronto.
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground font-medium">
                 Redirigiendo a la tienda...
               </p>
             </div>
@@ -160,20 +162,26 @@ export default function CartPage() {
       <>
         <StorefrontHeader />
         <main className="min-h-screen">
-          <div className="container py-8">
-            <h1 className="text-3xl font-heading font-bold mb-6">
+          <div className="container py-12">
+            <h1 className="text-4xl md:text-5xl font-heading font-bold mb-12 tracking-tight opacity-0 animate-fade-in">
               Carrito de compras
             </h1>
 
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <ShoppingCart className="h-16 w-16 text-muted-foreground mb-4" />
-              <h2 className="text-xl font-semibold mb-2">
+            <div className="flex flex-col items-center justify-center py-24 text-center opacity-0 animate-fade-in delay-200">
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-muted/50 mb-8">
+                <ShoppingCart className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <h2 className="text-2xl font-semibold mb-3">
                 Tu carrito está vacío
               </h2>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-lg text-muted-foreground mb-8 max-w-md">
                 Explora nuestros productos y encuentra algo que te guste
               </p>
-              <Button asChild>
+              <Button
+                asChild
+                size="lg"
+                className="rounded-full px-8 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
                 <Link href="/">Ir a la tienda</Link>
               </Button>
             </div>
@@ -187,40 +195,43 @@ export default function CartPage() {
     <>
       <StorefrontHeader />
       <main className="min-h-screen">
-        <div className="container py-8">
-          <h1 className="text-3xl font-heading font-bold mb-8">
+        <div className="container py-12">
+          <h1 className="text-4xl md:text-5xl font-heading font-bold mb-12 tracking-tight opacity-0 animate-fade-in">
             Carrito de compras
           </h1>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-12">
             {/* Cart Items */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-heading font-semibold mb-4">
+            <div className="space-y-6 opacity-0 animate-fade-in delay-100">
+              <h2 className="text-2xl font-heading font-semibold mb-6">
                 Productos ({items.length})
               </h2>
 
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <div
                   key={item.id}
-                  className="flex gap-4 p-4 border rounded-lg bg-card"
+                  className="flex gap-5 p-5 border border-border/50 rounded-3xl bg-card hover:shadow-lg transition-all duration-300 opacity-0 animate-fade-in-scale"
+                  style={{
+                    animationDelay: `${(index + 2) * 80}ms`,
+                  }}
                 >
-                  <div className="relative w-20 h-20 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                  <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-muted/30 flex-shrink-0">
                     {item.image_url ? (
                       <Image
                         src={item.image_url}
                         alt={item.name}
                         fill
                         className="object-cover"
-                        sizes="80px"
+                        sizes="96px"
                       />
                     ) : (
-                      <div className="w-full h-full bg-muted" />
+                      <div className="w-full h-full bg-muted/50" />
                     )}
                   </div>
 
                   <div className="flex-1">
-                    <h3 className="font-semibold mb-1">{item.name}</h3>
-                    <p className="text-lg font-bold text-primary">
+                    <h3 className="font-heading font-semibold text-lg mb-2 leading-snug">{item.name}</h3>
+                    <p className="text-2xl font-bold text-foreground tracking-tight">
                       ₡{item.price.toLocaleString("es-CR")}
                     </p>
                   </div>
@@ -228,17 +239,18 @@ export default function CartPage() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    className="rounded-full hover:bg-red-50 hover:text-red-500 transition-all duration-300"
                     onClick={() => removeItem(item.id)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-5 w-5" />
                   </Button>
                 </div>
               ))}
 
-              <div className="border-t pt-4 space-y-3">
-                <div className="flex justify-between items-center text-xl font-bold">
+              <div className="border-t border-border/50 pt-6 space-y-4 mt-8">
+                <div className="flex justify-between items-center text-2xl font-bold">
                   <span>Total:</span>
-                  <span className="text-primary">
+                  <span className="text-foreground text-3xl tracking-tight">
                     ₡{total.toLocaleString("es-CR")}
                   </span>
                 </div>
@@ -250,7 +262,7 @@ export default function CartPage() {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="w-full"
+                      className="w-full rounded-full border-2 hover:bg-accent transition-all duration-300"
                       onClick={handleBulkReserve}
                       disabled={isReserving || isSubmitting}
                     >
@@ -263,42 +275,43 @@ export default function CartPage() {
             </div>
 
             {/* Checkout Form */}
-            <div className="space-y-6">
+            <div className="space-y-8 opacity-0 animate-fade-in delay-200">
               <div>
-                <h2 className="text-xl font-heading font-semibold mb-4">
+                <h2 className="text-2xl font-heading font-semibold mb-6">
                   Completar compra
                 </h2>
 
                 {/* SINPE Instructions */}
-                <div className="rounded-lg bg-muted p-4 space-y-3 mb-6">
-                  <h3 className="font-semibold text-sm">
+                <div className="rounded-3xl bg-accent/50 p-6 space-y-4 mb-8 border border-border/30">
+                  <h3 className="font-semibold text-base">
                     1. Realiza el pago por SINPE Móvil
                   </h3>
-                  <div className="text-sm space-y-2">
-                    <div className="flex items-center justify-between bg-background px-3 py-2 rounded">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between bg-background px-5 py-4 rounded-2xl shadow-sm">
                       <div>
-                        <p className="text-xs text-muted-foreground">Número</p>
-                        <p className="font-mono font-medium">{sinpePhone}</p>
+                        <p className="text-xs text-muted-foreground font-medium mb-1">Número</p>
+                        <p className="font-mono font-semibold text-lg">{sinpePhone}</p>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={copyToClipboard}
+                        className="rounded-full hover:bg-accent transition-all duration-300"
                       >
                         {copied ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <CheckCircle2 className="h-5 w-5 text-green-500" />
                         ) : (
-                          <Copy className="h-4 w-4" />
+                          <Copy className="h-5 w-5" />
                         )}
                       </Button>
                     </div>
-                    <div className="bg-background px-3 py-2 rounded">
-                      <p className="text-xs text-muted-foreground">Nombre</p>
-                      <p className="font-medium">{sinpeName}</p>
+                    <div className="bg-background px-5 py-4 rounded-2xl shadow-sm">
+                      <p className="text-xs text-muted-foreground font-medium mb-1">Nombre</p>
+                      <p className="font-semibold text-lg">{sinpeName}</p>
                     </div>
-                    <div className="bg-background px-3 py-2 rounded">
-                      <p className="text-xs text-muted-foreground">Monto</p>
-                      <p className="font-bold text-primary">
+                    <div className="bg-background px-5 py-4 rounded-2xl shadow-sm">
+                      <p className="text-xs text-muted-foreground font-medium mb-1">Monto</p>
+                      <p className="font-bold text-2xl text-foreground tracking-tight">
                         ₡{total.toLocaleString("es-CR")}
                       </p>
                     </div>
@@ -307,23 +320,24 @@ export default function CartPage() {
 
                 {/* Order Form */}
                 <div>
-                  <h3 className="font-semibold text-sm mb-4">
+                  <h3 className="font-semibold text-base mb-6">
                     2. Completa tus datos
                   </h3>
 
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                       <FormField
                         control={form.control}
                         name="buyer_name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nombre completo</FormLabel>
+                            <FormLabel className="text-sm font-medium">Nombre completo</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="Juan Pérez"
                                 {...field}
                                 disabled={isSubmitting}
+                                className="h-12 rounded-xl border-border/50 focus:border-foreground transition-colors"
                               />
                             </FormControl>
                             <FormMessage />
@@ -336,12 +350,13 @@ export default function CartPage() {
                         name="buyer_phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Teléfono</FormLabel>
+                            <FormLabel className="text-sm font-medium">Teléfono</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="88888888"
                                 {...field}
                                 disabled={isSubmitting}
+                                className="h-12 rounded-xl border-border/50 focus:border-foreground transition-colors"
                               />
                             </FormControl>
                             <FormMessage />
@@ -354,13 +369,14 @@ export default function CartPage() {
                         name="buyer_email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Correo electrónico</FormLabel>
+                            <FormLabel className="text-sm font-medium">Correo electrónico</FormLabel>
                             <FormControl>
                               <Input
                                 type="email"
                                 placeholder="juan@ejemplo.com"
                                 {...field}
                                 disabled={isSubmitting}
+                                className="h-12 rounded-xl border-border/50 focus:border-foreground transition-colors"
                               />
                             </FormControl>
                             <FormMessage />
@@ -373,12 +389,13 @@ export default function CartPage() {
                         name="sinpe_reference"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Número de referencia SINPE</FormLabel>
+                            <FormLabel className="text-sm font-medium">Número de referencia SINPE</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="1234567890"
                                 {...field}
                                 disabled={isSubmitting}
+                                className="h-12 rounded-xl border-border/50 focus:border-foreground transition-colors"
                               />
                             </FormControl>
                             <FormMessage />
@@ -389,7 +406,7 @@ export default function CartPage() {
                       <Button
                         type="submit"
                         size="lg"
-                        className="w-full"
+                        className="w-full h-14 rounded-full text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 mt-6"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? "Procesando..." : "Confirmar orden"}
