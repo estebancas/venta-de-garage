@@ -16,11 +16,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const isSold = product.status === "sold";
   const isReserved = product.status === "reserved";
 
-  return (
-    <Link
-      href={`/producto/${product.id}`}
-      className="group block overflow-hidden rounded-lg border bg-card transition-all hover:shadow-lg"
-    >
+  const CardContent = (
+    <>
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Image
           src={firstImage}
@@ -29,10 +26,17 @@ export function ProductCard({ product }: ProductCardProps) {
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        {(isSold || isReserved) && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-            <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-black">
-              {isSold ? "Vendido" : "Reservado"}
+        {isSold && (
+          <div className="absolute top-2 right-2">
+            <span className="inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+              Vendido
+            </span>
+          </div>
+        )}
+        {isReserved && (
+          <div className="absolute top-2 right-2">
+            <span className="inline-flex items-center rounded-full bg-gray-500 px-3 py-1 text-xs font-semibold text-white shadow-lg">
+              Reservado
             </span>
           </div>
         )}
@@ -45,6 +49,25 @@ export function ProductCard({ product }: ProductCardProps) {
           ₡{product.price.toLocaleString("es-CR")}
         </p>
       </div>
+    </>
+  );
+
+  // Sold products are not clickable
+  if (isSold) {
+    return (
+      <div className="group block overflow-hidden rounded-lg border bg-card opacity-75 cursor-not-allowed">
+        {CardContent}
+      </div>
+    );
+  }
+
+  // Reserved and active products are clickable
+  return (
+    <Link
+      href={`/producto/${product.id}`}
+      className="group block overflow-hidden rounded-lg border bg-card transition-all hover:shadow-lg"
+    >
+      {CardContent}
     </Link>
   );
 }

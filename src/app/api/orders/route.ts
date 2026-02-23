@@ -38,72 +38,88 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
     const body = await request.json();
-    const { product_id, buyer_name, buyer_phone, buyer_email, sinpe_reference } = body;
+    const { products, buyer_name, buyer_phone, buyer_email, sinpe_reference } = body;
 
-    if (!product_id || !buyer_name || !buyer_phone || !buyer_email || !sinpe_reference) {
+    // Validate required fields
+    if (!products || !Array.isArray(products) || products.length === 0) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: "At least one product is required" },
         { status: 400 }
       );
     }
 
-    // Check if product exists and is available
-    const { data: product, error: productError } = await supabase
+    if (!buyer_name || !buyer_phone || !buyer_email || !sinpe_reference) {
+      return NextResponse.json(
+        { error: "All buyer fields are required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if all products exist and are available
+    const { data: productData, error: productError } = await supabase
       .from("products")
       .select("id, status")
-      .eq("id", product_id)
-      .single();
+      .in("id", products);
 
-    if (productError || !product) {
+    if (productError) {
       return NextResponse.json(
-        { error: "Product not found" },
+        { error: productError.message },
+        { status: 500 }
+      );
+    }
+
+    if (!productData || productData.length !== products.length) {
+      return NextResponse.json(
+        { error: "One or more products not found" },
         { status: 404 }
       );
     }
 
-    if (product.status !== "active") {
+    // Check if all products are active
+    const unavailableProducts = productData.filter((p) => p.status !== "active");
+    if (unavailableProducts.length > 0) {
       return NextResponse.json(
-        { error: "Product is not available" },
+        { error: "One or more products are not available" },
         { status: 400 }
       );
     }
 
-    // Create order and update product status in a transaction
-    const { data: order, error: orderError } = await supabase
+    // Create orders for each product
+    const ordersToInsert = products.map((productId) => ({
+      product_id: productId,
+      buyer_name,
+      buyer_phone,
+      buyer_email,
+      sinpe_reference,
+      status: "pending",
+    }));
+
+    const { data: orders, error: orderError } = await supabase
       .from("orders")
-      .insert([
-        {
-          product_id,
-          buyer_name,
-          buyer_phone,
-          buyer_email,
-          sinpe_reference,
-          status: "pending",
-        },
-      ])
-      .select()
-      .single();
+      .insert(ordersToInsert)
+      .select();
 
     if (orderError) {
       return NextResponse.json({ error: orderError.message }, { status: 500 });
     }
 
-    // Update product status to reserved
+    // Update all products status to reserved
     const { error: updateError } = await supabase
       .from("products")
       .update({ status: "reserved" })
-      .eq("id", product_id);
+      .in("id", products);
 
     if (updateError) {
-      // Rollback: delete the order if product update fails
-      await supabase.from("orders").delete().eq("id", order.id);
+      // Rollback: delete the orders if product update fails
+      const orderIds = orders.map((o) => o.id);
+      await supabase.from("orders").delete().in("id", orderIds);
       return NextResponse.json(
-        { error: "Failed to reserve product" },
+        { error: "Failed to reserve products" },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ data: order }, { status: 201 });
+    return NextResponse.json({ data: orders }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },

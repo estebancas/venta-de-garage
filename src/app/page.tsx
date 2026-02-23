@@ -36,8 +36,8 @@ export default function Home() {
         const categoriesData = await categoriesRes.json();
         setCategories(categoriesData.data || []);
 
-        // Fetch products
-        const productsRes = await fetch("/api/products?status=active");
+        // Fetch all products (including sold and reserved)
+        const productsRes = await fetch("/api/products");
         const productsData = await productsRes.json();
         setProducts(productsData.data || []);
       } catch (error) {

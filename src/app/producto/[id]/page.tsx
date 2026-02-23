@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { StorefrontHeader } from "@/components/storefront/storefront-header";
 import { ProductGallery } from "@/components/storefront/product-gallery";
-import { BuyButton } from "@/components/storefront/buy-button";
+import { ProductActions } from "@/components/storefront/product-actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -25,9 +25,8 @@ export default async function ProductPage({
     notFound();
   }
 
-  const isSold = product.status === "sold";
   const isReserved = product.status === "reserved";
-  const isAvailable = product.status === "active";
+  const isSold = product.status === "sold";
 
   return (
     <>
@@ -88,10 +87,8 @@ export default async function ProductPage({
                 </div>
               )}
 
-              {/* Buy Button */}
-              {isAvailable && (
-                <BuyButton productId={product.id} productName={product.name} />
-              )}
+              {/* Product Actions */}
+              <ProductActions product={product} />
             </div>
           </div>
         </div>
