@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       buyer_phone,
       buyer_email,
       sinpe_reference,
-      status: "pending",
+      status: "pending" as const,
     }));
 
     const { data: orders, error: orderError } = await supabase

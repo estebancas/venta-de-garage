@@ -30,7 +30,7 @@ const productFormSchema = z.object({
   description: z.string().optional(),
   price: z.string().min(1, "Price is required"),
   category_id: z.string().min(1, "Category is required"),
-  image_urls: z.array(z.string()).default([]),
+  image_urls: z.array(z.string()),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;

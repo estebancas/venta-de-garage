@@ -13,7 +13,7 @@ import { MoreHorizontal, CheckCircle, XCircle } from "lucide-react";
 
 interface OrderActionsProps {
   orderId: string;
-  productId: string;
+  productId: string | null;
   currentStatus: string;
 }
 
