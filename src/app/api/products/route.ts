@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       .select("*, categories(name, slug)")
       .order("created_at", { ascending: false });
 
-    if (status) {
+    if (status && (status === "active" || status === "sold" || status === "reserved")) {
       query = query.eq("status", status);
     }
 
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
           price: parseFloat(price),
           category_id,
           image_urls: image_urls || [],
-          status: "active",
+          status: "active" as const,
         },
       ])
       .select("*, categories(name, slug)")

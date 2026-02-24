@@ -44,3 +44,9 @@ next-env.d.ts
 **/supabase/.branches
 **/supabase/.temp
 **/supabase/functions/**/node_modules
+
+# AI agent skills and configurations
+.claude/
+.agents/
+.agent/
+skills-lock.json

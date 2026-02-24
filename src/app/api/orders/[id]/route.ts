@@ -56,18 +56,20 @@ export async function PATCH(
       );
     }
 
-    // Update product status based on order status
-    const productStatus = status === "verified" ? "sold" : "active";
-    const { error: updateProductError } = await supabase
-      .from("products")
-      .update({ status: productStatus })
-      .eq("id", order.product_id);
+    // Update product status based on order status (only if product_id exists)
+    if (order.product_id) {
+      const productStatus = status === "verified" ? "sold" : "active";
+      const { error: updateProductError } = await supabase
+        .from("products")
+        .update({ status: productStatus })
+        .eq("id", order.product_id);
 
-    if (updateProductError) {
-      return NextResponse.json(
-        { error: updateProductError.message },
-        { status: 500 }
-      );
+      if (updateProductError) {
+        return NextResponse.json(
+          { error: updateProductError.message },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({ success: true });
