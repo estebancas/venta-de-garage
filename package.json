@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "create-admin": "node scripts/create-admin.js"
+    "create-admin": "node scripts/create-admin.js",
+    "show-migrations": "bash scripts/show-migrations.sh"
   },
   "keywords": [],
   "author": "",
