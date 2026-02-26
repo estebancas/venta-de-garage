@@ -3,7 +3,7 @@
 import { StorefrontHeader } from "@/components/storefront/storefront-header";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Trash2, Copy, CheckCircle2, BookmarkPlus } from "lucide-react";
+import { ShoppingCart, Trash2, Copy, CheckCircle2, BookmarkPlus, Info } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
 import { getReservationToken } from "@/lib/reservation-token";
 import Image from "next/image";
@@ -280,6 +280,14 @@ export default function CartPage() {
                 <h2 className="text-2xl font-heading font-semibold mb-6">
                   Completar compra
                 </h2>
+
+                {/* Pickup Notice */}
+                <div className="flex items-start gap-3 rounded-2xl bg-blue-50 dark:bg-blue-950/20 p-4 border border-blue-200 dark:border-blue-900 mb-6">
+                  <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-blue-900 dark:text-blue-100 leading-relaxed">
+                    <span className="font-semibold">Retiro en persona.</span> No ofrecemos envíos. Coordinaremos contigo el lugar y hora de entrega.
+                  </p>
+                </div>
 
                 {/* SINPE Instructions */}
                 <div className="rounded-3xl bg-accent/50 p-6 space-y-4 mb-8 border border-border/30">
