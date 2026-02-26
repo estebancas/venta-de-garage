@@ -81,7 +81,8 @@ export type Database = {
           buyer_name: string
           buyer_phone: string
           buyer_email: string
-          sinpe_reference: string
+          sinpe_reference: string | null
+          order_type: "purchase" | "reservation"
           status: "pending" | "verified" | "rejected"
           created_at: string
         }
@@ -91,7 +92,8 @@ export type Database = {
           buyer_name: string
           buyer_phone: string
           buyer_email: string
-          sinpe_reference: string
+          sinpe_reference?: string | null
+          order_type?: "purchase" | "reservation"
           status?: "pending" | "verified" | "rejected"
           created_at?: string
         }
@@ -101,7 +103,8 @@ export type Database = {
           buyer_name?: string
           buyer_phone?: string
           buyer_email?: string
-          sinpe_reference?: string
+          sinpe_reference?: string | null
+          order_type?: "purchase" | "reservation"
           status?: "pending" | "verified" | "rejected"
           created_at?: string
         }

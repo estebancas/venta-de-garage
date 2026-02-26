@@ -3,9 +3,8 @@
 import { StorefrontHeader } from "@/components/storefront/storefront-header";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Trash2, Copy, CheckCircle2, BookmarkPlus, Info } from "lucide-react";
+import { ShoppingCart, Trash2, Copy, CheckCircle2, Info } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
-import { getReservationToken } from "@/lib/reservation-token";
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -27,7 +26,7 @@ const checkoutFormSchema = z.object({
   buyer_name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   buyer_phone: z.string().min(8, "El teléfono debe tener al menos 8 dígitos"),
   buyer_email: z.string().email("Ingrese un correo electrónico válido"),
-  sinpe_reference: z.string().min(4, "Ingrese el número de referencia de SINPE"),
+  sinpe_reference: z.string().optional(),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
@@ -38,7 +37,7 @@ export default function CartPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [isReserving, setIsReserving] = useState(false);
+  const [checkoutMode, setCheckoutMode] = useState<"purchase" | "reservation">("purchase");
 
   const sinpePhone = process.env.NEXT_PUBLIC_SINPE_PHONE || "";
   const sinpeName = process.env.NEXT_PUBLIC_SINPE_NAME || "";
@@ -55,6 +54,12 @@ export default function CartPage() {
   });
 
   async function onSubmit(values: CheckoutFormValues) {
+    // Validate SINPE reference for purchases
+    if (checkoutMode === "purchase" && !values.sinpe_reference) {
+      alert("El número de referencia SINPE es requerido para compras");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -66,6 +71,7 @@ export default function CartPage() {
         body: JSON.stringify({
           ...values,
           products: items.map((item) => item.id),
+          order_type: checkoutMode,
         }),
       });
 
@@ -95,42 +101,6 @@ export default function CartPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  async function handleBulkReserve() {
-    if (!confirm(`¿Estás seguro que deseas reservar ${items.length} producto${items.length > 1 ? 's' : ''}?`)) {
-      return;
-    }
-
-    setIsReserving(true);
-
-    try {
-      const token = getReservationToken();
-      const response = await fetch("/api/products/reserve-bulk", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          product_ids: items.map((item) => item.id),
-          reservation_token: token,
-        }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Error al reservar productos");
-      }
-
-      clearCart();
-      alert("Productos reservados exitosamente");
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al reservar productos");
-    } finally {
-      setIsReserving(false);
-    }
-  }
-
   if (isSuccess) {
     return (
       <>
@@ -142,10 +112,12 @@ export default function CartPage() {
                 <CheckCircle2 className="h-20 w-20 text-green-500" />
               </div>
               <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4 tracking-tight">
-                ¡Orden recibida!
+                {checkoutMode === "purchase" ? "¡Orden recibida!" : "¡Reserva confirmada!"}
               </h2>
               <p className="text-lg text-muted-foreground mb-3 leading-relaxed">
-                Verificaremos tu pago y te contactaremos pronto.
+                {checkoutMode === "purchase"
+                  ? "Verificaremos tu pago y te contactaremos pronto."
+                  : "Te contactaremos para coordinar el pago y la entrega."}
               </p>
               <p className="text-sm text-muted-foreground font-medium">
                 Redirigiendo a la tienda...
@@ -254,23 +226,6 @@ export default function CartPage() {
                     ₡{total.toLocaleString("es-CR")}
                   </span>
                 </div>
-
-                {enableReserve && (
-                  <>
-                    <ReserveInfoAlert />
-
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full rounded-full border-2 hover:bg-accent transition-all duration-300"
-                      onClick={handleBulkReserve}
-                      disabled={isReserving || isSubmitting}
-                    >
-                      <BookmarkPlus className="mr-2 h-5 w-5" />
-                      {isReserving ? "Reservando..." : `Reservar ${items.length} producto${items.length > 1 ? 's' : ''}`}
-                    </Button>
-                  </>
-                )}
               </div>
             </div>
 
@@ -278,8 +233,43 @@ export default function CartPage() {
             <div className="space-y-8 opacity-0 animate-fade-in delay-200">
               <div>
                 <h2 className="text-2xl font-heading font-semibold mb-6">
-                  Completar compra
+                  Completar {checkoutMode === "purchase" ? "compra" : "reserva"}
                 </h2>
+
+                {/* Checkout Mode Toggle */}
+                {enableReserve && (
+                  <div className="flex gap-3 mb-6 p-1 bg-muted/50 rounded-2xl">
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutMode("purchase")}
+                      className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                        checkoutMode === "purchase"
+                          ? "bg-background shadow-md text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Comprar ahora
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCheckoutMode("reservation")}
+                      className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                        checkoutMode === "reservation"
+                          ? "bg-background shadow-md text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Reservar
+                    </button>
+                  </div>
+                )}
+
+                {/* Reserve Info Alert */}
+                {enableReserve && checkoutMode === "reservation" && (
+                  <div className="mb-6">
+                    <ReserveInfoAlert />
+                  </div>
+                )}
 
                 {/* Pickup Notice */}
                 <div className="flex items-start gap-3 rounded-2xl bg-blue-50 dark:bg-blue-950/20 p-4 border border-blue-200 dark:border-blue-900 mb-6">
@@ -289,11 +279,12 @@ export default function CartPage() {
                   </p>
                 </div>
 
-                {/* SINPE Instructions */}
-                <div className="rounded-3xl bg-accent/50 p-6 space-y-4 mb-8 border border-border/30">
-                  <h3 className="font-semibold text-base">
-                    1. Realiza el pago por SINPE Móvil
-                  </h3>
+                {/* SINPE Instructions - Only for purchases */}
+                {checkoutMode === "purchase" && (
+                  <div className="rounded-3xl bg-accent/50 p-6 space-y-4 mb-8 border border-border/30">
+                    <h3 className="font-semibold text-base">
+                      1. Realiza el pago por SINPE Móvil
+                    </h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between bg-background px-5 py-4 rounded-2xl shadow-sm">
                       <div>
@@ -324,12 +315,13 @@ export default function CartPage() {
                       </p>
                     </div>
                   </div>
-                </div>
+                  </div>
+                )}
 
                 {/* Order Form */}
                 <div>
                   <h3 className="font-semibold text-base mb-6">
-                    2. Completa tus datos
+                    {checkoutMode === "purchase" ? "2. Completa tus datos" : "Completa tus datos"}
                   </h3>
 
                   <Form {...form}>
@@ -392,24 +384,26 @@ export default function CartPage() {
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="sinpe_reference"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-medium">Número de referencia SINPE</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="1234567890"
-                                {...field}
-                                disabled={isSubmitting}
-                                className="h-12 rounded-xl border-border/50 focus:border-foreground transition-colors"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      {checkoutMode === "purchase" && (
+                        <FormField
+                          control={form.control}
+                          name="sinpe_reference"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-medium">Número de referencia SINPE</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="1234567890"
+                                  {...field}
+                                  disabled={isSubmitting}
+                                  className="h-12 rounded-xl border-border/50 focus:border-foreground transition-colors"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                       <Button
                         type="submit"
@@ -417,7 +411,11 @@ export default function CartPage() {
                         className="w-full h-14 rounded-full text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 mt-6"
                         disabled={isSubmitting}
                       >
-                        {isSubmitting ? "Procesando..." : "Confirmar orden"}
+                        {isSubmitting
+                          ? "Procesando..."
+                          : checkoutMode === "purchase"
+                          ? "Confirmar compra"
+                          : "Confirmar reserva"}
                       </Button>
                     </form>
                   </Form>
