@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 // GET all orders (admin only)
@@ -36,12 +36,15 @@ export async function GET() {
 // POST new order (public)
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createServiceClient();
     const body = await request.json();
-    const { products, buyer_name, buyer_phone, buyer_email, sinpe_reference } = body;
+    const { product_id, products, buyer_name, buyer_phone, buyer_email, sinpe_reference } = body;
+
+    // Handle both single product_id and products array for backward compatibility
+    const productIds = product_id ? [product_id] : products;
 
     // Validate required fields
-    if (!products || !Array.isArray(products) || products.length === 0) {
+    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
       return NextResponse.json(
         { error: "At least one product is required" },
         { status: 400 }
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
     const { data: productData, error: productError } = await supabase
       .from("products")
       .select("id, status")
-      .in("id", products);
+      .in("id", productIds);
 
     if (productError) {
       return NextResponse.json(
@@ -68,7 +71,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!productData || productData.length !== products.length) {
+    if (!productData || productData.length !== productIds.length) {
       return NextResponse.json(
         { error: "One or more products not found" },
         { status: 404 }
@@ -85,7 +88,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create orders for each product
-    const ordersToInsert = products.map((productId) => ({
+    const ordersToInsert = productIds.map((productId) => ({
       product_id: productId,
       buyer_name,
       buyer_phone,
@@ -107,7 +110,7 @@ export async function POST(request: NextRequest) {
     const { error: updateError } = await supabase
       .from("products")
       .update({ status: "reserved" })
-      .in("id", products);
+      .in("id", productIds);
 
     if (updateError) {
       // Rollback: delete the orders if product update fails
