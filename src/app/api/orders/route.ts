@@ -38,7 +38,15 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createServiceClient();
     const body = await request.json();
-    const { product_id, products, buyer_name, buyer_phone, buyer_email, sinpe_reference } = body;
+    const {
+      product_id,
+      products,
+      buyer_name,
+      buyer_phone,
+      buyer_email,
+      sinpe_reference,
+      order_type = "purchase"
+    } = body;
 
     // Handle both single product_id and products array for backward compatibility
     const productIds = product_id ? [product_id] : products;
@@ -51,9 +59,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!buyer_name || !buyer_phone || !buyer_email || !sinpe_reference) {
+    if (!buyer_name || !buyer_phone || !buyer_email) {
       return NextResponse.json(
-        { error: "All buyer fields are required" },
+        { error: "Name, phone, and email are required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate order_type
+    if (order_type !== "purchase" && order_type !== "reservation") {
+      return NextResponse.json(
+        { error: "Invalid order_type. Must be 'purchase' or 'reservation'" },
+        { status: 400 }
+      );
+    }
+
+    // SINPE reference is required for purchases but optional for reservations
+    if (order_type === "purchase" && !sinpe_reference) {
+      return NextResponse.json(
+        { error: "SINPE reference is required for purchases" },
         { status: 400 }
       );
     }
@@ -93,7 +117,8 @@ export async function POST(request: NextRequest) {
       buyer_name,
       buyer_phone,
       buyer_email,
-      sinpe_reference,
+      sinpe_reference: sinpe_reference || null,
+      order_type,
       status: "pending" as const,
     }));
 
