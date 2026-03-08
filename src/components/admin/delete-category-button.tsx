@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Trash2 } from "lucide-react";
+import { toast } from "@/lib/toast-utils";
 
 interface DeleteCategoryButtonProps {
   categoryId: string;
@@ -40,10 +41,11 @@ export function DeleteCategoryButton({
         throw new Error(data.error || "Failed to delete category");
       }
 
+      toast.success(`Category "${categoryName}" deleted successfully`);
       setIsOpen(false);
       router.refresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to delete category");
+      toast.error(error instanceof Error ? error.message : "Failed to delete category");
     } finally {
       setIsDeleting(false);
     }

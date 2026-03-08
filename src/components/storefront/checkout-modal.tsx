@@ -23,6 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
+import { toast } from "@/lib/toast-utils";
 
 const checkoutFormSchema = z.object({
   buyer_name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -90,7 +91,7 @@ export function CheckoutModal({
         router.refresh();
       }, 3000);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al procesar la orden");
+      toast.error(error instanceof Error ? error.message : "Error al procesar la orden");
     } finally {
       setIsSubmitting(false);
     }

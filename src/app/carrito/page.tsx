@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ReserveInfoAlert } from "@/components/storefront/reserve-info-alert";
+import { toast } from "@/lib/toast-utils";
 
 const checkoutFormSchema = z.object({
   buyer_name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -56,7 +57,7 @@ export default function CartPage() {
   async function onSubmit(values: CheckoutFormValues) {
     // Validate SINPE reference for purchases
     if (checkoutMode === "purchase" && !values.sinpe_reference) {
-      alert("El número de referencia SINPE es requerido para compras");
+      toast.warning("El número de referencia SINPE es requerido para compras");
       return;
     }
 
@@ -89,7 +90,7 @@ export default function CartPage() {
         router.push("/");
       }, 3000);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Error al procesar la orden");
+      toast.error(error instanceof Error ? error.message : "Error al procesar la orden");
     } finally {
       setIsSubmitting(false);
     }

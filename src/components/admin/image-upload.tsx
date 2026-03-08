@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { toast } from "@/lib/toast-utils";
 
 interface ImageUploadProps {
   value: string[];
@@ -25,7 +26,7 @@ export function ImageUpload({
 
     // Check if we'll exceed max images
     if (value.length + files.length > maxImages) {
-      alert(`You can only upload up to ${maxImages} images`);
+      toast.warning(`You can only upload up to ${maxImages} images`);
       return;
     }
 
@@ -69,9 +70,10 @@ export function ImageUpload({
 
       const uploadedUrls = await Promise.all(uploadPromises);
       onChange([...value, ...uploadedUrls]);
+      toast.success(`${uploadedUrls.length} image${uploadedUrls.length > 1 ? 's' : ''} uploaded successfully`);
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Failed to upload images. Please try again.");
+      toast.error("Failed to upload images. Please try again.");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

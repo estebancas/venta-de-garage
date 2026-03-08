@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useCart } from "@/contexts/cart-context";
 import { AlertCircle, ShoppingCart } from "lucide-react";
+import { toast } from "@/lib/toast-utils";
 
 interface ProductActionsProps {
   product: {
@@ -32,6 +33,7 @@ export function ProductActions({ product }: ProductActionsProps) {
       price: product.price,
       image_url: product.image_urls[0] || "",
     });
+    toast.success("Producto agregado al carrito");
     router.push("/carrito");
   }
 
