@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, CheckCircle, XCircle } from "lucide-react";
+import { useConfirm } from "@/hooks/use-confirm";
+import { toast } from "@/lib/toast-utils";
 
 interface OrderActionsProps {
   orderId: string;
@@ -23,10 +25,19 @@ export function OrderActions({
   currentStatus,
 }: OrderActionsProps) {
   const router = useRouter();
+  const confirm = useConfirm();
   const [isUpdating, setIsUpdating] = useState(false);
 
   async function updateOrderStatus(newStatus: "verified" | "rejected") {
-    if (!confirm(`Are you sure you want to mark this order as ${newStatus}?`)) {
+    const confirmed = await confirm({
+      title: `Mark order as ${newStatus}`,
+      description: `Are you sure you want to mark this order as ${newStatus}? This action will update the order status.`,
+      confirmText: newStatus === "verified" ? "Verify" : "Reject",
+      cancelText: "Cancel",
+      variant: newStatus === "rejected" ? "destructive" : "default",
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -46,9 +57,10 @@ export function OrderActions({
         throw new Error(data.error || "Failed to update order");
       }
 
+      toast.success(`Order ${newStatus === "verified" ? "verified" : "rejected"} successfully`);
       router.refresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to update order");
+      toast.error(error instanceof Error ? error.message : "Failed to update order");
     } finally {
       setIsUpdating(false);
     }

@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
       buyer_phone,
       buyer_email,
       sinpe_reference,
-      order_type = "purchase"
+      order_type = "purchase",
+      reservation_token
     } = body;
 
     // Handle both single product_id and products array for backward compatibility
@@ -131,10 +132,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: orderError.message }, { status: 500 });
     }
 
-    // Update all products status to reserved
+    // Update all products status to reserved with reservation token
     const { error: updateError } = await supabase
       .from("products")
-      .update({ status: "reserved" })
+      .update({
+        status: "reserved",
+        reserved_by: reservation_token || null
+      })
       .in("id", productIds);
 
     if (updateError) {
@@ -148,6 +152,101 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ data: orders }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE order - Cancel reservation (public, but only for the user who reserved)
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = await createServiceClient();
+    const body = await request.json();
+    const { product_id, reservation_token } = body;
+
+    // Validate required fields
+    if (!product_id) {
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!reservation_token) {
+      return NextResponse.json(
+        { error: "Reservation token is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if the product exists and is reserved by this user
+    const { data: product, error: productError } = await supabase
+      .from("products")
+      .select("id, status, reserved_by")
+      .eq("id", product_id)
+      .single();
+
+    if (productError || !product) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      );
+    }
+
+    // Verify the product is reserved
+    if (product.status !== "reserved") {
+      return NextResponse.json(
+        { error: "Product is not reserved" },
+        { status: 400 }
+      );
+    }
+
+    // Verify the reservation token matches
+    if (product.reserved_by !== reservation_token) {
+      return NextResponse.json(
+        { error: "You are not authorized to cancel this reservation" },
+        { status: 403 }
+      );
+    }
+
+    // Find and delete the order(s) for this product
+    const { error: deleteOrderError } = await supabase
+      .from("orders")
+      .delete()
+      .eq("product_id", product_id)
+      .eq("order_type", "reservation")
+      .eq("status", "pending");
+
+    if (deleteOrderError) {
+      return NextResponse.json(
+        { error: "Failed to delete order" },
+        { status: 500 }
+      );
+    }
+
+    // Reset product status to active and clear reserved_by
+    const { error: updateProductError } = await supabase
+      .from("products")
+      .update({
+        status: "active",
+        reserved_by: null,
+      })
+      .eq("id", product_id);
+
+    if (updateProductError) {
+      return NextResponse.json(
+        { error: "Failed to update product status" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Reservation cancelled successfully" },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },

@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "@/lib/toast-utils";
 
 interface ProductStatusSelectProps {
   productId: string;
@@ -53,9 +54,10 @@ export function ProductStatusSelect({
         throw new Error(data.error || "Failed to update status");
       }
 
+      toast.success(`Product status updated to ${statusLabels[newStatus as keyof typeof statusLabels]}`);
       router.refresh();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Failed to update status");
+      toast.error(error instanceof Error ? error.message : "Failed to update status");
       router.refresh(); // Refresh to reset the select to current status
     } finally {
       setIsUpdating(false);

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { CartProvider } from "@/contexts/cart-context";
+import { ConfirmProvider } from "@/hooks/use-confirm";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,7 +26,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${GeistSans.variable} font-sans antialiased`}
       >
-        <CartProvider>{children}</CartProvider>
+        <ConfirmProvider>
+          <CartProvider>{children}</CartProvider>
+        </ConfirmProvider>
+        <Toaster position="bottom-center" />
       </body>
     </html>
   );
