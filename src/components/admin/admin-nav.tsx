@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Package, ShoppingCart, FolderTree } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, FolderTree, MapPin } from "lucide-react";
 
 const navItems = [
   {
@@ -25,6 +25,11 @@ const navItems = [
     title: "Orders",
     href: "/admin/orders",
     icon: ShoppingCart,
+  },
+  {
+    title: "Ubicación",
+    href: "/admin/location",
+    icon: MapPin,
   },
 ];
 

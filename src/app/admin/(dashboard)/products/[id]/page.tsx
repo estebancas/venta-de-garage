@@ -41,7 +41,11 @@ export default async function EditProductPage({
 
       <div className="max-w-2xl">
         <ProductForm
-          initialData={productsResult.data}
+          initialData={{
+            ...productsResult.data,
+            status: productsResult.data.status || "active",
+            image_urls: productsResult.data.image_urls || [],
+          }}
           categories={categoriesResult.data || []}
         />
       </div>
