@@ -3,20 +3,6 @@ import { redirect } from "next/navigation";
 import { LocationForm } from "@/components/admin/location-form";
 import { MapPin } from "lucide-react";
 
-interface StoreLocation {
-  id: string;
-  provincia: string;
-  canton: string;
-  distrito: string;
-  codigo_postal: string;
-  direccion_exacta: string | null;
-  map_link: string | null;
-  coordenadas: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
 export default async function LocationPage() {
   const supabase = await createClient();
 
@@ -29,11 +15,11 @@ export default async function LocationPage() {
   }
 
   // Fetch existing location if any
-  const { data: location } = (await supabase
-    .from("store_location" as any)
+  const { data: location } = await supabase
+    .from("store_location")
     .select("*")
     .eq("is_active", true)
-    .maybeSingle()) as { data: StoreLocation | null };
+    .maybeSingle();
 
   return (
     <div className="space-y-6">

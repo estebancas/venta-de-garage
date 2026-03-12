@@ -88,7 +88,7 @@ export default async function OrdersPage() {
               orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">
-                    {format(new Date(order.created_at), "PPp", { locale: es })}
+                    {order.created_at ? format(new Date(order.created_at), "PPp", { locale: es }) : "N/A"}
                   </TableCell>
                   <TableCell>
                     {order.products?.name || "Unknown product"}
@@ -101,17 +101,17 @@ export default async function OrdersPage() {
                     </div>
                   </TableCell>
                   <TableCell className="font-mono text-sm">
-                    {order.sinpe_reference}
+                    {order.sinpe_reference || "N/A"}
                   </TableCell>
                   <TableCell>
                     ₡{order.products?.price.toLocaleString("es-CR")}
                   </TableCell>
-                  <TableCell>{getStatusBadge(order.status)}</TableCell>
+                  <TableCell>{order.status ? getStatusBadge(order.status) : "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <OrderActions
                       orderId={order.id}
                       productId={order.product_id}
-                      currentStatus={order.status}
+                      currentStatus={order.status || "pending"}
                     />
                   </TableCell>
                 </TableRow>

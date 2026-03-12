@@ -1,30 +1,16 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-interface StoreLocation {
-  id: string;
-  provincia: string;
-  canton: string;
-  distrito: string;
-  codigo_postal: string;
-  direccion_exacta: string | null;
-  map_link: string | null;
-  coordenadas: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
 // GET active location (public)
 export async function GET() {
   try {
     const supabase = await createClient();
 
-    const { data, error } = (await supabase
-      .from("store_location" as any)
+    const { data, error } = await supabase
+      .from("store_location")
       .select("*")
       .eq("is_active", true)
-      .maybeSingle()) as { data: StoreLocation | null; error: any };
+      .maybeSingle();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -76,18 +62,18 @@ export async function POST(request: NextRequest) {
     const serviceSupabase = await createServiceClient();
 
     // First, check if an active location exists
-    const { data: existingLocation } = (await serviceSupabase
-      .from("store_location" as any)
+    const { data: existingLocation } = await serviceSupabase
+      .from("store_location")
       .select("id")
       .eq("is_active", true)
-      .maybeSingle()) as { data: { id: string } | null };
+      .maybeSingle();
 
     let result;
 
     if (existingLocation) {
       // Update existing location
       const { data, error } = await serviceSupabase
-        .from("store_location" as any)
+        .from("store_location")
         .update({
           provincia,
           canton,
@@ -109,7 +95,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Create new location
       const { data, error } = await serviceSupabase
-        .from("store_location" as any)
+        .from("store_location")
         .insert([
           {
             provincia,

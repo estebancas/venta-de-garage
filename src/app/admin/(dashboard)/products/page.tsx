@@ -71,7 +71,7 @@ export default async function ProductsPage() {
                   <TableCell>
                     <ProductStatusSelect
                       productId={product.id}
-                      currentStatus={product.status}
+                      currentStatus={product.status || "active"}
                     />
                   </TableCell>
                   <TableCell className="text-right">

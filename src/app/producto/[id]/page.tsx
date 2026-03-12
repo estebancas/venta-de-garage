@@ -50,7 +50,7 @@ export default async function ProductPage({
           <div className="grid md:grid-cols-2 gap-12 lg:gap-16">
             {/* Product Gallery */}
             <div className="opacity-0 animate-fade-in delay-100">
-              <ProductGallery images={product.image_urls} />
+              <ProductGallery images={product.image_urls || []} />
             </div>
 
             {/* Product Info */}
@@ -95,7 +95,13 @@ export default async function ProductPage({
 
               {/* Product Actions */}
               <div className="pt-4">
-                <ProductActions product={product} />
+                <ProductActions
+                  product={{
+                    ...product,
+                    status: product.status || "active",
+                    image_urls: product.image_urls || [],
+                  }}
+                />
               </div>
             </div>
           </div>
