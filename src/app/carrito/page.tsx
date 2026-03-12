@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Trash2, Copy, CheckCircle2, Info } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -20,14 +20,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ReserveInfoAlert } from "@/components/storefront/reserve-info-alert";
 import { toast } from "@/lib/toast-utils";
+import { loadUserInfo, saveUserInfo } from "@/lib/user-storage";
 
 const checkoutFormSchema = z.object({
   buyer_name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   buyer_phone: z.string().min(8, "El teléfono debe tener al menos 8 dígitos"),
   buyer_email: z.string().email("Ingrese un correo electrónico válido"),
-  sinpe_reference: z.string().optional(),
+  sinpe_reference: z.string().min(1, "El número de referencia SINPE es requerido"),
 });
 
 type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
@@ -38,11 +38,9 @@ export default function CartPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [checkoutMode, setCheckoutMode] = useState<"purchase" | "reservation">("purchase");
 
   const sinpePhone = process.env.NEXT_PUBLIC_SINPE_PHONE || "";
   const sinpeName = process.env.NEXT_PUBLIC_SINPE_NAME || "";
-  const enableReserve = process.env.NEXT_PUBLIC_ENABLE_RESERVE === "true";
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutFormSchema),
@@ -54,16 +52,30 @@ export default function CartPage() {
     },
   });
 
-  async function onSubmit(values: CheckoutFormValues) {
-    // Validate SINPE reference for purchases
-    if (checkoutMode === "purchase" && !values.sinpe_reference) {
-      toast.warning("El número de referencia SINPE es requerido para compras");
-      return;
+  // Load saved user info on mount
+  useEffect(() => {
+    const savedInfo = loadUserInfo();
+    if (savedInfo) {
+      form.reset({
+        buyer_name: savedInfo.buyer_name,
+        buyer_phone: savedInfo.buyer_phone,
+        buyer_email: savedInfo.buyer_email,
+        sinpe_reference: "",
+      });
     }
+  }, [form]);
 
+  async function onSubmit(values: CheckoutFormValues) {
     setIsSubmitting(true);
 
     try {
+      // Save user info for future use
+      saveUserInfo({
+        buyer_name: values.buyer_name,
+        buyer_phone: values.buyer_phone,
+        buyer_email: values.buyer_email,
+      });
+
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
@@ -72,7 +84,7 @@ export default function CartPage() {
         body: JSON.stringify({
           ...values,
           products: items.map((item) => item.id),
-          order_type: checkoutMode,
+          order_type: "purchase",
         }),
       });
 
@@ -113,12 +125,10 @@ export default function CartPage() {
                 <CheckCircle2 className="h-20 w-20 text-green-500" />
               </div>
               <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4 tracking-tight">
-                {checkoutMode === "purchase" ? "¡Orden recibida!" : "¡Reserva confirmada!"}
+                ¡Orden recibida!
               </h2>
               <p className="text-lg text-muted-foreground mb-3 leading-relaxed">
-                {checkoutMode === "purchase"
-                  ? "Verificaremos tu pago y te contactaremos pronto."
-                  : "Te contactaremos para coordinar el pago y la entrega."}
+                Verificaremos tu pago y te contactaremos pronto.
               </p>
               <p className="text-sm text-muted-foreground font-medium">
                 Redirigiendo a la tienda...
@@ -234,43 +244,8 @@ export default function CartPage() {
             <div className="space-y-8 opacity-0 animate-fade-in delay-200">
               <div>
                 <h2 className="text-2xl font-heading font-semibold mb-6">
-                  Completar {checkoutMode === "purchase" ? "compra" : "reserva"}
+                  Completar compra
                 </h2>
-
-                {/* Checkout Mode Toggle */}
-                {enableReserve && (
-                  <div className="flex gap-3 mb-6 p-1 bg-muted/50 rounded-2xl">
-                    <button
-                      type="button"
-                      onClick={() => setCheckoutMode("purchase")}
-                      className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
-                        checkoutMode === "purchase"
-                          ? "bg-background shadow-md text-foreground"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Comprar ahora
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCheckoutMode("reservation")}
-                      className={`flex-1 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
-                        checkoutMode === "reservation"
-                          ? "bg-background shadow-md text-foreground"
-                          : "text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      Reservar
-                    </button>
-                  </div>
-                )}
-
-                {/* Reserve Info Alert */}
-                {enableReserve && checkoutMode === "reservation" && (
-                  <div className="mb-6">
-                    <ReserveInfoAlert />
-                  </div>
-                )}
 
                 {/* Pickup Notice */}
                 <div className="flex items-start gap-3 rounded-2xl bg-blue-50 dark:bg-blue-950/20 p-4 border border-blue-200 dark:border-blue-900 mb-6">
@@ -280,12 +255,11 @@ export default function CartPage() {
                   </p>
                 </div>
 
-                {/* SINPE Instructions - Only for purchases */}
-                {checkoutMode === "purchase" && (
-                  <div className="rounded-3xl bg-accent/50 p-6 space-y-4 mb-8 border border-border/30">
-                    <h3 className="font-semibold text-base">
-                      1. Realiza el pago por SINPE Móvil
-                    </h3>
+                {/* SINPE Instructions */}
+                <div className="rounded-3xl bg-accent/50 p-6 space-y-4 mb-8 border border-border/30">
+                  <h3 className="font-semibold text-base">
+                    1. Realiza el pago por SINPE Móvil
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between bg-background px-5 py-4 rounded-2xl shadow-sm">
                       <div>
@@ -316,13 +290,12 @@ export default function CartPage() {
                       </p>
                     </div>
                   </div>
-                  </div>
-                )}
+                </div>
 
                 {/* Order Form */}
                 <div>
                   <h3 className="font-semibold text-base mb-6">
-                    {checkoutMode === "purchase" ? "2. Completa tus datos" : "Completa tus datos"}
+                    2. Completa tus datos
                   </h3>
 
                   <Form {...form}>
@@ -385,26 +358,24 @@ export default function CartPage() {
                         )}
                       />
 
-                      {checkoutMode === "purchase" && (
-                        <FormField
-                          control={form.control}
-                          name="sinpe_reference"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-sm font-medium">Número de referencia SINPE</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="1234567890"
-                                  {...field}
-                                  disabled={isSubmitting}
-                                  className="h-12 rounded-xl border-border/50 focus:border-foreground transition-colors"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
+                      <FormField
+                        control={form.control}
+                        name="sinpe_reference"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">Número de referencia SINPE</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="1234567890"
+                                {...field}
+                                disabled={isSubmitting}
+                                className="h-12 rounded-xl border-border/50 focus:border-foreground transition-colors"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       <Button
                         type="submit"
@@ -412,11 +383,7 @@ export default function CartPage() {
                         className="w-full h-14 rounded-full text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-300 mt-6"
                         disabled={isSubmitting}
                       >
-                        {isSubmitting
-                          ? "Procesando..."
-                          : checkoutMode === "purchase"
-                          ? "Confirmar compra"
-                          : "Confirmar reserva"}
+                        {isSubmitting ? "Procesando..." : "Confirmar compra"}
                       </Button>
                     </form>
                   </Form>
