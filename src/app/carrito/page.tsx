@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/lib/toast-utils";
 import { loadUserInfo, saveUserInfo } from "@/lib/user-storage";
+import { LocationInfo } from "@/components/storefront/location-info";
 
 const checkoutFormSchema = z.object({
   buyer_name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -247,12 +248,9 @@ export default function CartPage() {
                   Completar compra
                 </h2>
 
-                {/* Pickup Notice */}
-                <div className="flex items-start gap-3 rounded-2xl bg-blue-50 dark:bg-blue-950/20 p-4 border border-blue-200 dark:border-blue-900 mb-6">
-                  <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-blue-900 dark:text-blue-100 leading-relaxed">
-                    <span className="font-semibold">Retiro en persona.</span> No ofrecemos envíos. Coordinaremos contigo el lugar y hora de entrega.
-                  </p>
+                {/* Location Information */}
+                <div className="mb-6">
+                  <LocationInfo />
                 </div>
 
                 {/* SINPE Instructions */}

@@ -62,10 +62,10 @@ export default function Home() {
           {/* Hero Section */}
           <div className="mb-16 text-center opacity-0 animate-fade-in">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading font-bold mb-6 tracking-tight leading-[1.1]">
-              Encuentra tesoros únicos
+              Objetos con historia
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-light leading-relaxed">
-              Artículos de segunda mano en excelente estado a precios increíbles
+              Artículos de segunda mano en excelente estado a buenos precios
             </p>
           </div>
 

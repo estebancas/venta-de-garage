@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast-utils";
 import { getReservationToken } from "@/lib/reservation-token";
 import { loadUserInfo, saveUserInfo } from "@/lib/user-storage";
+import { LocationInfo } from "./location-info";
 import { Loader2 } from "lucide-react";
 
 const reserveFormSchema = z.object({
@@ -130,6 +131,8 @@ export function ReserveModal({
             contactaremos pronto para coordinar la entrega.
           </DialogDescription>
         </DialogHeader>
+
+        <LocationInfo />
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
