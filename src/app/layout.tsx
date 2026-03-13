@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     siteName: 'Venta de Garage',
     images: [
       {
-        url: 'https://estebanybiankavendensustiliches.com/og.png',
+        url: 'https://estebanybiankavendensustiliches.com/og.jpg',
         width: 1200,
         height: 630,
         alt: 'Venta de Garage - Esteban y Bianka venden sus tiliches',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "Venta de Garage",
     description: "Productos únicos de segunda mano, en buen estado y a excelentes precios.",
-    images: ['https://estebanybiankavendensustiliches.com/og.png'],
+    images: ['https://estebanybiankavendensustiliches.com/og.jpg'],
   },
   icons: {
     icon: '/favicon.svg',
