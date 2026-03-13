@@ -33,8 +33,11 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
     description: "",
   });
 
+  const resolveRef = React.useRef<((value: boolean) => void) | undefined>(undefined);
+
   const confirm = React.useCallback((options: ConfirmOptions): Promise<boolean> => {
     return new Promise((resolve) => {
+      resolveRef.current = resolve;
       setState({
         open: true,
         ...options,
@@ -44,21 +47,21 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleConfirm = React.useCallback(() => {
-    state.resolve?.(true);
+    resolveRef.current?.(true);
     setState((prev) => ({ ...prev, open: false }));
-  }, [state.resolve]);
+  }, []);
 
   const handleCancel = React.useCallback(() => {
-    state.resolve?.(false);
+    resolveRef.current?.(false);
     setState((prev) => ({ ...prev, open: false }));
-  }, [state.resolve]);
+  }, []);
 
   const handleOpenChange = React.useCallback((open: boolean) => {
     if (!open) {
-      state.resolve?.(false);
+      resolveRef.current?.(false);
       setState((prev) => ({ ...prev, open: false }));
     }
-  }, [state.resolve]);
+  }, []);
 
   return (
     <ConfirmContext.Provider value={{ confirm }}>

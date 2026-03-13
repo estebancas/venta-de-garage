@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, ShoppingCart, DollarSign, Clock } from "lucide-react";
+import Link from "next/link";
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -79,7 +80,7 @@ export default async function AdminDashboardPage() {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <a
+            <Link
               href="/admin/products/new"
               className="block p-3 rounded-md border hover:bg-accent transition-colors"
             >
@@ -87,7 +88,7 @@ export default async function AdminDashboardPage() {
               <div className="text-sm text-muted-foreground">
                 List a new item for sale
               </div>
-            </a>
+            </Link>
             <a
               href="/admin/orders"
               className="block p-3 rounded-md border hover:bg-accent transition-colors"
