@@ -6,6 +6,57 @@ import { ProductActions } from "@/components/storefront/product-actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const { data: product, error } = await supabase
+    .from("products")
+    .select("*, categories(name, slug)")
+    .eq("id", id)
+    .single();
+
+  if (error || !product) {
+    return {
+      title: 'Producto no encontrado - Venta de Garage',
+      description: 'El producto que buscas no está disponible.',
+    };
+  }
+
+  const productImage = product.image_urls?.[0];
+  const title = `${product.name} - ₡${product.price.toLocaleString("es-CR")}`;
+  const description = product.description || `${product.name} disponible en Venta de Garage`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: productImage ? [
+        {
+          url: productImage,
+          width: 1200,
+          height: 630,
+          alt: product.name,
+        }
+      ] : undefined,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: productImage ? [productImage] : undefined,
+    },
+  };
+}
 
 export default async function ProductPage({
   params,
@@ -28,8 +79,35 @@ export default async function ProductPage({
   const isReserved = product.status === "reserved";
   const isSold = product.status === "sold";
 
+  // Generate structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description || `${product.name} disponible en Venta de Garage`,
+    "image": product.image_urls || [],
+    "offers": {
+      "@type": "Offer",
+      "price": product.price,
+      "priceCurrency": "CRC",
+      "availability": isSold
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
+      "itemCondition": "https://schema.org/UsedCondition",
+      "url": `https://estebanybiankavendensustiliches.com/producto/${id}`,
+    },
+    ...(product.categories && {
+      "category": product.categories.name,
+    }),
+  };
+
   return (
     <>
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <StorefrontHeader />
       <main className="min-h-screen">
         <div className="container py-8 md:py-12">
