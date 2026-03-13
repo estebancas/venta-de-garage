@@ -1,0 +1,27 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#grad)"/>
+
+  <!-- Main title -->
+  <text x="600" y="280" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white" text-anchor="middle">
+    Venta de Garage
+  </text>
+
+  <!-- Subtitle -->
+  <text x="600" y="360" font-family="Arial, sans-serif" font-size="36" fill="#E0E7FF" text-anchor="middle">
+    Tiliches Únicos
+  </text>
+
+  <!-- Domain -->
+  <text x="600" y="520" font-family="Arial, sans-serif" font-size="24" fill="#C7D2FE" text-anchor="middle">
+    estebanybiankavendedsustiliches.com
+  </text>
+</svg>
